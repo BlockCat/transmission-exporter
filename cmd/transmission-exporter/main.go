@@ -6,7 +6,7 @@ import (
 
 	arg "github.com/alexflint/go-arg"
 	"github.com/joho/godotenv"
-	transmission "github.com/metalmatze/transmission-exporter"
+	transmission "github.com/BlockCat/transmission-exporter"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
