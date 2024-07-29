@@ -4,10 +4,11 @@ import (
 	"log"
 	"net/http"
 
+	transmission "github.com/BlockCat/transmission-exporter"
 	arg "github.com/alexflint/go-arg"
 	"github.com/joho/godotenv"
-	transmission "github.com/BlockCat/transmission-exporter"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Config gets its content from env and passes it on to different packages
@@ -45,11 +46,11 @@ func main() {
 
 	client := transmission.New(c.TransmissionAddr, user)
 
-	prometheus.MustRegister(NewTorrentCollector(client))
-	prometheus.MustRegister(NewSessionCollector(client))
-	prometheus.MustRegister(NewSessionStatsCollector(client))
+	reg := prometheus.NewRegistry()
 
-	http.Handle(c.WebPath, prometheus.Handler())
+	reg.MustRegister(NewTorrentCollector(client), NewSessionCollector(client), NewSessionStatsCollector(client))
+
+	http.Handle(c.WebPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
